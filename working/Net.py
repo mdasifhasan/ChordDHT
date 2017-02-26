@@ -20,7 +20,7 @@ class Net:
         socket = self.context.socket(zmq.REQ)
         connect_str = "tcp://" + ip + ":5555"
         socket.connect(connect_str)
-        socket.send("%i %i" % (proc, data))
+        socket.send("%s %s" % (proc, data))
         print "sent to remote node"
         return socket.recv()
 
@@ -34,5 +34,6 @@ class Net:
             message = socket.recv()
             print("Server: Received request: %s" % message)
             ret_msg = self.callback(message)
+            print "Server: Responding to message:", ret_msg
             socket.send(ret_msg)
 
