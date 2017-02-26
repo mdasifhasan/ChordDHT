@@ -2,8 +2,8 @@ import hashlib
 from hash_ring import HashRing
 from Net import Net
 import sys
-
-
+from threading import Thread
+import time
 class Finger:
     def __init__(self):
         self.succssor = 0
@@ -17,16 +17,18 @@ class ChordNode:
         else:
             self.ip = "127.0.0.1"
         self.listID = []
-        for i in range(0, 128):
+        for i in range(0, 256):
             self.listID.append(i)
         self.id = self.hash()
         print "Initialize ChordNode", self.id
         self.successor = self.id
+        self.successor_ip = self.ip
         self.predecessor = None
-        self.m = 128
+        self.m = 8
         self.finger = {}
         self.init_finger_table()
         self.net = Net(self.ip, callbackMsgRcvd=self.message_received)
+        self.next = -1
 
         if len(sys.argv) >= 3:
             self.start_mode = "join"
@@ -40,15 +42,33 @@ class ChordNode:
         else:
             self.successor = self.id
 
+        t = Thread(target=self.fix_fingers)
+        t.start()
+
     def join(self):
         print "joining to", self.join_ip
-        self.successor = self.call_remote_proc(self.join_ip, "findSuccessor", str(self.id))
+        s, self.successor_ip = self.call_remote_proc(self.join_ip, "findSuccessor", str(self.id)).split()
+        self.successor = int(s)
 
+    def fix_fingers(self):
+        time.sleep(3)
+        while True:
+            time.sleep(3)
+            self.next += 1
+            if self.next >= self.m:
+                self.next = 0
+            print "fix_fingers", self.next
+            s = self.find_successor((self.id + 2**(self.next))%256)
+            print "fix_fingers", self.next, " rcvd s:", s
+            self.finger[self.next].successor,self.finger[self.next].ip = s.split()
+            print "fix_fingers fixed to ", self.finger[self.next].ip
+            for i in range(0, len(self.finger)):
+                print i, " --- ", (self.id + 2**(i))%256, " --- ", self.finger[i].successor, " --- ", self.finger[i].ip
     def message_received(self, msg):
         print "New msg arrived", "msg:", msg
         topic,data = msg.split()
         if topic == "findSuccessor":
-            return self.find_successor(data)
+            return self.find_successor(int(data))
         return "0"
 
     def init_finger_table(self):
@@ -59,17 +79,27 @@ class ChordNode:
             self.finger[i] = f
 
     def find_successor(self, id):
-        if id in range(self.id, self.successor):
-            return self.ip
+        print "find_successor called for ", id, "self.successor", self.successor
+        if id < self.id:
+            id = id + 256
+        if self.id > self.successor and id in range(self.id, 256+self.successor):
+            return str(self.successor) +" "+self.successor_ip
+        elif id in range(self.id, self.successor):
+            return str(self.successor) +" "+self.successor_ip
         else:
             n = self.closest_preceding_node(id)
-            if n == None:
-                return self.ip
+            if n is None:
+                return str(self.id) + " " + self.ip
+            if n.successor == self.successor:
+                return str(self.id) + " " + self.ip
             return self.call_remote_proc(n.ip, "findSuccessor", str(id))
 
     def closest_preceding_node(self, id):
-        for i in range(self.m-1, -1):
-            if self.finger[i].successor in range(self.id, id+1):
+        for i in range(self.m-1, -1, -1):
+            print "closest_preceding_node, i:", i
+            if self.id > id and self.finger[i].successor in range(self.id , 256+id+1):
+                return self.finger[i]
+            elif self.finger[i].successor in range(self.id, id+1):
                 return self.finger[i]
         return None
 
