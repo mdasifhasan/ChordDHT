@@ -21,10 +21,11 @@ class ChordNode:
             self.listID.append(i)
         self.id = self.hash()
         print "Initialize ChordNode", self.id
-        self.successor = -1
+        self.successor = self.id
         self.predecessor = None
-        self.finger = {}
         self.m = 128
+        self.finger = {}
+        self.init_finger_table()
         self.net = Net(self.ip, callbackMsgRcvd=self.message_received)
 
         if len(sys.argv) >= 3:
@@ -45,6 +46,9 @@ class ChordNode:
 
     def message_received(self, msg):
         print "New msg arrived", "msg:", msg
+        topic,data = msg.split()
+        if topic == "findSuccessor":
+            return self.find_successor(data)
         return "0"
 
     def init_finger_table(self):
@@ -56,16 +60,18 @@ class ChordNode:
 
     def find_successor(self, id):
         if id in range(self.id, self.successor):
-            return self.successor
+            return self.ip
         else:
             n = self.closest_preceding_node(id)
+            if n == None:
+                return self.ip
             return self.call_remote_proc(n.ip, "findSuccessor", str(id))
 
     def closest_preceding_node(self, id):
-        for i in range(self.m, 0):
-            if self.finger[i] in range(self.id, id):
+        for i in range(self.m-1, -1):
+            if self.finger[i].successor in range(self.id, id+1):
                 return self.finger[i]
-        return self.id
+        return None
 
     def call_remote_proc(self, ip, proc, data):
         print "Calling remote proc of ", ip, " proc", proc, "with data:", data
