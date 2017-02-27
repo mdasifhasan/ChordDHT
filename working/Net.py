@@ -21,19 +21,19 @@ class Net:
         connect_str = "tcp://" + ip + ":5555"
         socket.connect(connect_str)
         socket.send("%s %s" % (proc, data))
-        print "sent to remote node"
+        #print "sent to remote node"
         return socket.recv()
 
     def start_server(self):
         socket = self.context.socket(zmq.REP)
         #socket.bind("tcp://*:5555")
         socket.bind("tcp://" + self.ip + ":5555")
-        print "Starting server:", self.ip
+        #print "Starting server:", self.ip
         while True:
             #  Wait for next request from client
             message = socket.recv()
-            print("Server: Received request: %s" % message)
+            #print("Server: Received request: %s" % message)
             ret_msg = self.callback(message)
-            print "Server: Responding to message:", ret_msg
+            #print "Server: Responding to message:", ret_msg
             socket.send(ret_msg)
 

@@ -68,11 +68,11 @@ class ChordNode:
             s = self.find_successor((self.id + 2**(self.next))%256)
             print "fix_fingers", self.next, " rcvd s:", s
             self.finger[self.next].successor,self.finger[self.next].ip = s.split()
-            print "fix_fingers fixed to ", self.finger[self.next].ip
+            #print "fix_fingers fixed to ", self.finger[self.next].ip
             for i in range(0, len(self.finger)):
                 print i, " --- ", (self.id + 2**(i))%256, " --- ", self.finger[i].successor, " --- ", self.finger[i].ip
     def message_received(self, msg):
-        print "New msg arrived", "msg:", msg
+        #print "New msg arrived", "msg:", msg
         topic,data = msg.split()
         if topic == "findSuccessor":
             return self.find_successor(int(data))
@@ -96,30 +96,30 @@ class ChordNode:
             self.finger[i] = f
 
     def find_successor(self, id):
-        print "find_successor called for ", id, "self.successor", self.successor
+        #print "find_successor called for ", id, "self.successor", self.successor
         # if id < self.id:
         #     id = id + 256
         if self.id > int(self.successor) and self.id > id:
             if id + 256 in range(self.id, 256+int(self.successor)+1):
-                print "find_s 1"
+                #print "find_s 1"
                 return str(self.successor) +" "+self.successor_ip
         elif self.id > int(self.successor):
             if id in range(self.id, 256+int(self.successor)+1):
-                print "find_s 2"
+                #print "find_s 2"
                 return str(self.successor) +" "+self.successor_ip
         elif self.id > id:
             if id + 256 in range(self.id, int(self.successor)+1):
-                print "find_s 7"
+                #print "find_s 7"
                 return str(self.successor) +" "+self.successor_ip
         elif id in range(self.id, int(self.successor)+1):
-            print "find_s 3"
+            #print "find_s 3"
             return str(self.successor) +" "+self.successor_ip
         n = self.closest_preceding_node(id)
         if n is None:
-            print "find_s 4"
+            #print "find_s 4"
             return str(self.id) + " " + self.ip
         if int(n.successor) == self.id:
-            print "find_s 5"
+            #print "find_s 5"
             n = Finger()
             n.successor = self.successor
             n.ip = self.successor_ip
@@ -127,7 +127,7 @@ class ChordNode:
                 return str(self.id) + " " + self.ip
         # if n.successor == self.successor:
         #     return str(self.id) + " " + self.ip
-        print "find_s 6"
+        #print "find_s 6"
         return self.call_remote_proc(n.ip, "findSuccessor", str(id))
 
     def closest_preceding_node(self, id):
@@ -139,7 +139,7 @@ class ChordNode:
                 b = False
                 if s > int(self.id) and s < n_id:
                     b = True
-                print "1 closest_preceding_node, i:", i, s, self.id, n_id, s in range(self.id, n_id), b
+                #print "1 closest_preceding_node, i:", i, s, self.id, n_id, s in range(self.id, n_id), b
                 # if s in range(self.id, n_id):
                 if b:
                     return self.finger[i]
@@ -149,7 +149,7 @@ class ChordNode:
                 b = False
                 if s > int(self.id) and s < n_id:
                     b = True
-                print "2 closest_preceding_node, i:", i, s, self.id, n_id, s in range(self.id, n_id), b
+                #print "2 closest_preceding_node, i:", i, s, self.id, n_id, s in range(self.id, n_id), b
                 # if s in range(self.id, n_id):
                 if b:
                     return self.finger[i]
@@ -159,7 +159,7 @@ class ChordNode:
                 b = False
                 if s > int(self.id) and s < n_id:
                     b = True
-                print "3 closest_preceding_node, i:", i, s, self.id, n_id, s in range(self.id, n_id), b
+                #print "3 closest_preceding_node, i:", i, s, self.id, n_id, s in range(self.id, n_id), b
                 # if s in range(self.id, n_id):
                 if b:
                     return self.finger[i]
@@ -168,9 +168,9 @@ class ChordNode:
         return None
 
     def call_remote_proc(self, ip, proc, data):
-        print "Calling remote proc of ", ip, " proc", proc, "with data:", data
+        #print "Calling remote proc of ", ip, " proc", proc, "with data:", data
         ret_msg = self.net.call_remote_procedure(ip, proc, data)
-        print "rcvd msg from RPC: ", ip, " proc", proc, "with data:", data, "rcvd:", ret_msg
+        #print "rcvd msg from RPC: ", ip, " proc", proc, "with data:", data, "rcvd:", ret_msg
         return ret_msg
 
     def hash(self):
