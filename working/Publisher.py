@@ -32,7 +32,7 @@ class Publisher:
             print "for the message %s with priority %d" % (
             topic, priority), "process time in publisher is", time.clock()
 
-            time.sleep(0.25)
+            time.sleep(1.25)
 
     def call_remote_procedure(self, ip, proc, data):
         socket = self.context.socket(zmq.REQ)

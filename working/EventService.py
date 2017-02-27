@@ -9,13 +9,15 @@ class EventService:
     def __init__(self, ip, start_mode="create", join_ip=""):
         print "Running Event Service"
         self.chord = ChordNode(ip, start_mode, join_ip)
+        self.ip = ip
         t = Thread(target=self.broker)
         t.start()
 
 
     def broker(self):
-        xpub_url = "tcp://127.0.0.1:5555"
-        xsub_url = "tcp://127.0.0.1:5556"
+        print "Starting thread for Broker"
+        xpub_url = "tcp://" + self.ip + ":5555"
+        xsub_url = "tcp://" + self.ip + ":5556"
         list1 = []
         list2 = []
         ctx = zmq.Context()
@@ -30,7 +32,9 @@ class EventService:
 
         while True:
             events = dict(poller.poll(1000))
+            print len(events)
             if xpub in events:
+                print "xpub in events"
                 message = xpub.recv_multipart()
                 list2.append(message)
                 if message[0] == b'\x01':
@@ -49,6 +53,7 @@ class EventService:
                     print "process time of", x, "in intermediary is", time.clock()
 
             if xsub in events:
+                print "xsub in events"
                 message = xsub.recv_multipart()
                 list2.append(message)
 
