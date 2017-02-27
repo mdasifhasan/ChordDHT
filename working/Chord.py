@@ -64,7 +64,7 @@ class ChordNode:
             self.next += 1
             if self.next >= self.m:
                 self.next = 0
-            print "fix_fingers", self.next, "s:",self.successor, "p:", self.predecessor
+            print self.id, ": fix_fingers", self.next, "s:",self.successor, "p:", self.predecessor
             s = self.find_successor((self.id + 2**(self.next))%256)
             print "fix_fingers", self.next, " rcvd s:", s
             self.finger[self.next].successor,self.finger[self.next].ip = s.split()
@@ -133,7 +133,7 @@ class ChordNode:
     def closest_preceding_node(self, id):
         for i in range(self.m-1, -1, -1):
             #if self.id > id and self.id < self.finger[i].successor and self.finger[i].successor in range(self.id , 256+id):
-            if self.id > id and self.id > self.finger[i].successor:
+            if self.id > id and self.id > int(self.finger[i].successor):
                 s = int(self.finger[i].successor) + 256
                 n_id = (256 + id)
                 b = False
