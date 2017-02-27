@@ -60,7 +60,7 @@ class ChordNode:
     def fix_fingers(self):
         time.sleep(3)
         while True:
-            time.sleep(1)
+            time.sleep(3)
             self.next += 1
             if self.next >= self.m:
                 self.next = 0
@@ -107,6 +107,10 @@ class ChordNode:
             if id in range(self.id, 256+int(self.successor)+1):
                 print "find_s 2"
                 return str(self.successor) +" "+self.successor_ip
+        elif self.id > id:
+            if id + 256 in range(self.id, int(self.successor)+1):
+                print "find_s 7"
+                return str(self.successor) +" "+self.successor_ip
         elif id in range(self.id, int(self.successor)+1):
             print "find_s 3"
             return str(self.successor) +" "+self.successor_ip
@@ -116,6 +120,7 @@ class ChordNode:
             return str(self.id) + " " + self.ip
         if int(n.successor) == self.id:
             print "find_s 5"
+            n = Finger()
             n.successor = self.successor
             n.ip = self.successor_ip
             if int(n.successor) == self.id:
@@ -145,6 +150,16 @@ class ChordNode:
                 if s > int(self.id) and s < n_id:
                     b = True
                 print "2 closest_preceding_node, i:", i, s, self.id, n_id, s in range(self.id, n_id), b
+                # if s in range(self.id, n_id):
+                if b:
+                    return self.finger[i]
+            elif self.id > int(self.finger[i].successor):
+                s = int(self.finger[i].successor) + 256
+                n_id = id
+                b = False
+                if s > int(self.id) and s < n_id:
+                    b = True
+                print "3 closest_preceding_node, i:", i, s, self.id, n_id, s in range(self.id, n_id), b
                 # if s in range(self.id, n_id):
                 if b:
                     return self.finger[i]
