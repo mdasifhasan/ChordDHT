@@ -19,11 +19,11 @@ class ChordNode:
         self.listID = []
         for i in range(0, 256):
             self.listID.append(i)
-        self.id = self.hash()
+        self.id = int(self.hash())
         print "Initialize ChordNode", self.id
-        self.successor = self.id
+        self.successor = int(self.id)
         self.successor_ip = self.ip
-        self.predecessor = self.id
+        self.predecessor = int(self.id)
         self.predecessor_ip = self.ip
         self.m = 8
         self.finger = {}
@@ -41,7 +41,7 @@ class ChordNode:
         if self.start_mode == "join":
             self.join()
         else:
-            self.successor = self.id
+            self.successor = int(self.id)
 
         t = Thread(target=self.fix_fingers)
         t.start()
@@ -60,7 +60,7 @@ class ChordNode:
     def fix_fingers(self):
         time.sleep(3)
         while True:
-            time.sleep(3)
+            time.sleep(1)
             self.next += 1
             if self.next >= self.m:
                 self.next = 0
@@ -91,17 +91,24 @@ class ChordNode:
     def init_finger_table(self):
         for i in range(0, self.m):
             f = Finger()
-            f.successor = self.id
+            f.successor = int(self.id)
             f.ip = self.getIP()
             self.finger[i] = f
 
     def find_successor(self, id):
         print "find_successor called for ", id, "self.successor", self.successor
-        if id < self.id:
-            id = id + 256
-        if self.id > self.successor and id in range(self.id, 256+self.successor):
-            return str(self.successor) +" "+self.successor_ip
-        elif id in range(self.id, self.successor):
+        # if id < self.id:
+        #     id = id + 256
+        if self.id > int(self.successor) and self.id > id:
+            if id + 256 in range(self.id, 256+int(self.successor)+1):
+                print "find_s 1"
+                return str(self.successor) +" "+self.successor_ip
+        elif self.id > int(self.successor):
+            if id in range(self.id, 256+self.successor+1):
+                print "find_s 2"
+                return str(self.successor) +" "+self.successor_ip
+        elif id in range(self.id, int(self.successor)+1):
+            print "find_s 3"
             return str(self.successor) +" "+self.successor_ip
         else:
             n = self.closest_preceding_node(id)
@@ -109,16 +116,34 @@ class ChordNode:
                 return str(self.id) + " " + self.ip
             if n.successor == self.id:
                 return str(self.id) + " " + self.ip
-            if n.successor == self.successor:
-                return str(self.id) + " " + self.ip
+            # if n.successor == self.successor:
+            #     return str(self.id) + " " + self.ip
             return self.call_remote_proc(n.ip, "findSuccessor", str(id))
 
     def closest_preceding_node(self, id):
         for i in range(self.m-1, -1, -1):
-            print "closest_preceding_node, i:", i
-            if self.id > id and self.finger[i].successor in range(self.id , 256+id+1):
-                return self.finger[i]
-            elif self.finger[i].successor in range(self.id, id+1):
+            #if self.id > id and self.id < self.finger[i].successor and self.finger[i].successor in range(self.id , 256+id):
+            if self.id > id and self.id > self.finger[i].successor:
+                s = int(self.finger[i].successor) + 256
+                n_id = (256 + id)
+                b = False
+                if s > int(self.id) and s < n_id:
+                    b = True
+                print "1 closest_preceding_node, i:", i, s, self.id, n_id, s in range(self.id, n_id), b
+                # if s in range(self.id, n_id):
+                if b:
+                    return self.finger[i]
+            elif self.id > id:
+                s = int(self.finger[i].successor)
+                n_id = (256 + id)
+                b = False
+                if s > int(self.id) and s < n_id:
+                    b = True
+                print "2 closest_preceding_node, i:", i, s, self.id, n_id, s in range(self.id, n_id), b
+                # if s in range(self.id, n_id):
+                if b:
+                    return self.finger[i]
+            elif self.finger[i].successor in range(self.id, id):
                 return self.finger[i]
         return None
 
