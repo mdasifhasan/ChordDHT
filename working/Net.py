@@ -18,7 +18,7 @@ class Net:
 
     def call_remote_procedure(self, ip, proc, data):
         socket = self.context.socket(zmq.REQ)
-        connect_str = "tcp://" + ip + ":5555"
+        connect_str = "tcp://" + ip + ":5550"
         socket.connect(connect_str)
         socket.send("%s %s" % (proc, data))
         #print "sent to remote node"
@@ -27,7 +27,7 @@ class Net:
     def start_server(self):
         socket = self.context.socket(zmq.REP)
         #socket.bind("tcp://*:5555")
-        socket.bind("tcp://" + self.ip + ":5555")
+        socket.bind("tcp://" + self.ip + ":5550")
         #print "Starting server:", self.ip
         while True:
             #  Wait for next request from client

@@ -1,10 +1,10 @@
 import os
 import string
 import sys
+
+from threading import Thread
 import time
 from random import randint
-from threading import Thread
-
 import zmq
 
 xpub_url = "tcp://127.0.0.1:5555"

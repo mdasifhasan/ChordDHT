@@ -1,4 +1,3 @@
-import hashlib
 from hash_ring import HashRing
 from Net import Net
 import sys
@@ -10,12 +9,10 @@ class Finger:
         self.ip = ""
 
 
+
 class ChordNode:
-    def __init__(self):
-        if len(sys.argv) >= 2:
-            self.ip = sys.argv[1]
-        else:
-            self.ip = "127.0.0.1"
+    def __init__(self, ip, start_mode="create", join_ip=""):
+        self.ip = ip
         self.listID = []
         for i in range(0, 256):
             self.listID.append(i)
@@ -30,19 +27,13 @@ class ChordNode:
         self.init_finger_table()
         self.net = Net(self.ip, callbackMsgRcvd=self.message_received)
         self.next = -1
-
-        if len(sys.argv) >= 3:
-            self.start_mode = "join"
-            self.join_ip = sys.argv[2]
-            print "start_mode:", self.start_mode, "join_ip", self.join_ip
-        else:
-            self.start_mode = "create"
-
+        self.start_mode = start_mode
+        self.join_ip = join_ip
+        print "start_mode:", self.start_mode, "join_ip", self.join_ip
         if self.start_mode == "join":
             self.join()
         else:
             self.successor = int(self.id)
-
         t = Thread(target=self.fix_fingers)
         t.start()
 
@@ -181,5 +172,16 @@ class ChordNode:
     def getIP(self):
         return self.ip
 
+if __name__ == '__main__':
+    if len(sys.argv) >= 2:
+        ip = sys.argv[1]
+    else:
+        ip = "127.0.0.1"
+    if len(sys.argv) >= 3:
+        start_mode = "join"
+        join_ip = sys.argv[2]
+        ChordNode(ip, start_mode, join_ip)
+    else:
+        ChordNode(ip)
 
-ChordNode()
+#ChordNode()
