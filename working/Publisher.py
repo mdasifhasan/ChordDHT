@@ -12,6 +12,7 @@ class Publisher:
             self.listID.append(i)
         ring = HashRing(self.listID)
         self.id = ring.get_node(topic)
+        print "id assigned:", self.id
         self.join_ip = join_ip
         self.topic = topic
 
